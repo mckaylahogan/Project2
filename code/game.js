@@ -2,7 +2,8 @@
 var actorChars = {
   "@": Player,
   "o": Coin, // A coin will wobble up and down
-  "=": Lava, "|": Lava, "v": Lava  
+  "=": Lava, "|": Lava, "v": Lava,  
+  "$": Enemy
 };
 
 function Level(plan) {
@@ -38,6 +39,10 @@ function Level(plan) {
       // Because there is a third case (space ' '), use an "else if" instead of "else"
       else if (ch == "!")
         fieldType = "lava";
+	  else if (ch == "y")
+		  fieldType = "floater";
+	  else if (ch == "#")
+		  fieldType = "portal";
 
       // "Push" the fieldType, which is a string, onto the gridLine array (at the end).
       gridLine.push(fieldType);
@@ -88,6 +93,14 @@ function Coin(pos) {
   this.wobble = Math.random() * Math.PI * 2;
 }
 Coin.prototype.type = "coin";
+
+// Enemy function 
+function Enemy(pos) {
+	this.basePos = this.pos = pos.plus(new Vector (0.2, 0.1));
+	this.size = new Vector(1.5, 1.5);
+	this.wobble = Math.random() * Math.PI * 6;
+}
+Enemy.prototype.type = 'enemy';
 
 // Lava is initialized based on the character, but otherwise has a
 // size and position
@@ -294,14 +307,10 @@ Coin.prototype.act = function(step) {
   this.pos = this.basePos.plus(new Vector(0, wobblePos));
 };
 
-var maxStep = 0.05;
-
-var wobbleSpeed = 8, wobbleDist = 0.07;
-
-Coin.prototype.act = function(step) {
-  this.wobble += step * wobbleSpeed;
-  var wobblePos = Math.sin(this.wobble) * wobbleDist;
-  this.pos = this.basePos.plus(new Vector(0, wobblePos));
+Enemy.prototype.act = function(step) {
+	this.wobble += step * wobbleSpeed;
+	var wobblePos = Math.sin(this.wobble) * wobbleDist;
+	this.pos = this.basePos.plus(new Vector(0, wobblePos));
 };
 
 var maxStep = 0.05;
@@ -329,6 +338,8 @@ Player.prototype.moveX = function(step, level, keys) {
 var gravity = 30;
 var jumpSpeed = 17;
 
+
+
 Player.prototype.moveY = function(step, level, keys) {
   // Accelerate player downward (always)
   this.speed.y += step * gravity;;
@@ -346,6 +357,13 @@ Player.prototype.moveY = function(step, level, keys) {
   } else {
     this.pos = newPos;
   }
+	if (obstacle == 'lava') {
+		this.pos = new Vector(4, 2);
+	}
+	if (obstacle == 'portal') {
+		this.pos = new Vector(4, 2);
+	}
+	
 };
 
 Player.prototype.act = function(step, level, keys) {
