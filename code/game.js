@@ -3,7 +3,7 @@ var actorChars = {
   "@": Player,
   "o": Coin, // A coin will wobble up and down
   "=": Lava, "|": Lava, "v": Lava,  
-  "$": Enemy
+  "$": Jumper
 };
 
 function Level(plan) {
@@ -94,13 +94,13 @@ function Coin(pos) {
 }
 Coin.prototype.type = "coin";
 
-// Enemy function 
-function Enemy(pos) {
+// Jumper function 
+function Jumper(pos) {
 	this.basePos = this.pos = pos.plus(new Vector (0.2, 0.1));
 	this.size = new Vector(1.5, 1.5);
 	this.wobble = Math.random() * Math.PI * 6;
 }
-Enemy.prototype.type = 'enemy';
+Jumper.prototype.type = 'jumper';
 
 // Lava is initialized based on the character, but otherwise has a
 // size and position
@@ -307,7 +307,7 @@ Coin.prototype.act = function(step) {
   this.pos = this.basePos.plus(new Vector(0, wobblePos));
 };
 
-Enemy.prototype.act = function(step) {
+Jumper.prototype.act = function(step) {
 	this.wobble += step * wobbleSpeed;
 	var wobblePos = Math.sin(this.wobble) * wobbleDist;
 	this.pos = this.basePos.plus(new Vector(0, wobblePos));
@@ -363,7 +363,9 @@ Player.prototype.moveY = function(step, level, keys) {
 	if (obstacle == 'portal') {
 		this.pos = new Vector(4, 2);
 	}
-	
+		if (obstacle == 'jumper') {
+			jumpSpeed = 30;
+		}
 };
 
 Player.prototype.act = function(step, level, keys) {
@@ -388,10 +390,13 @@ Level.prototype.playerTouched = function(type, actor) {
   if (type == "lava" && this.status == null) {
     this.status = "lost";
     this.finishDelay = 1;
-  } else if (type == "coin") {
+  } else if (type == "coin", "jumper") {
     this.actors = this.actors.filter(function(other) {
       return other != actor;
     });
+	if (type == "jumper") {
+		jumpSpeed = 25;
+	}
     // If there aren't any coins left, player wins
     if (!this.actors.some(function(actor) {
            return actor.type == "coin";
