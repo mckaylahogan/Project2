@@ -390,7 +390,7 @@ Level.prototype.playerTouched = function(type, actor) {
   if (type == "lava" && this.status == null) {
     this.status = "lost";
     this.finishDelay = 1;
-  } else if (type == "coin", "jumper") {
+  } else if (type == "coin" || type == "jumper") {
     this.actors = this.actors.filter(function(other) {
       return other != actor;
     });
